@@ -48,3 +48,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Usa `snake_case` solo dentro de la capa de persistencia.
 - Define todos los contratos de API, tanto request como response, en `camelCase`.
+
+## Documentación de mejoras
+
+- Cada mejora debe incluir un archivo Markdown en `docs/` que describa la funcionalidad y cómo utilizarla. Si amplía una funcionalidad ya documentada, actualiza su archivo para mantener una única fuente de verdad.
+- Documenta las reglas de negocio, los endpoints y sus contratos, los cambios de base de datos y migraciones, y los controles de seguridad cuando correspondan.
+- Registra las verificaciones ejecutadas, sus resultados y las limitaciones pendientes. Distingue las migraciones creadas localmente de las aplicadas y no declares verificaciones que no se hayan ejecutado.
+- Mantén la documentación en español, proporcional al cambio y actualizada con el comportamiento implementado.
+
+## Skills del proyecto
+
+- Mantén las Skills completas y compartidas en `.codex/skills/door-list-ui/` y `.codex/skills/impeccable/`, incluidos sus agentes, referencias, scripts y ejecutables.
+- Las entradas de `.agents/skills/` sirven para el descubrimiento de Codex y remiten a los `SKILL.md` canónicos de `.codex/skills/`. Lee los canónicos y resuelve sus recursos desde esas carpetas; no mantengas copias independientes de sus instrucciones.
+- Incluye las Skills, sus entradas de descubrimiento y `.codex/hooks.json` en los commits y PR que las incorporen o cambien. No vuelvas a ignorar esas rutas completas ni las retires del índice de Git como archivos locales.
+- Conserva ignorados los demás estados y configuraciones locales de `.codex/` y `.agents/`; no agregues credenciales ni tokens a estos archivos.

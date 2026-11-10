@@ -11,7 +11,8 @@ export async function authenticatedBuyerClient(request: Request) {
   if (!token || !url || !key) return null;
   const client = createClient(url, key, { auth: authOptions, global: { headers: { Authorization: `Bearer ${token}` } } });
   const { data, error } = await client.auth.getUser(token);
-  return !error && data.user ? { client, buyerId: data.user.id } : null;
+  return !error && data.user && data.user.app_metadata?.account_type !== "access_staff"
+    ? { client, buyerId: data.user.id } : null;
 }
 
 export function adminClient() {

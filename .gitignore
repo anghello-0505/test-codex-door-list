@@ -46,9 +46,28 @@ supabase/.temp/
 # vercel
 .vercel
 
-# Local agent tooling
-.agents/
-.codex/
+# Project skills are shared with the repository. Ignore other local agent state.
+/.codex/*
+!/.codex/skills/
+!/.codex/hooks.json
+/.codex/skills/*
+!/.codex/skills/door-list-ui/
+!/.codex/skills/door-list-ui/**
+!/.codex/skills/impeccable/
+!/.codex/skills/impeccable/**
+
+# Codex discovery entries delegate to the canonical skills in .codex/skills.
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/door-list-ui/
+!/.agents/skills/impeccable/
+/.agents/skills/door-list-ui/*
+!/.agents/skills/door-list-ui/SKILL.md
+/.agents/skills/impeccable/*
+!/.agents/skills/impeccable/SKILL.md
+
+# Generated design-review state stays local.
 .impeccable/
 
 # typescript

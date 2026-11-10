@@ -1,0 +1,6 @@
+﻿interface:
+  display_name: "Doorlist UI"
+  short_description: "Aplica el sistema visual de Doorlist a la UI"
+  default_prompt: "Usa $door-list-ui para crear o actualizar esta interfaz de Doorlist."
+policy:
+  allow_implicit_invocation: true

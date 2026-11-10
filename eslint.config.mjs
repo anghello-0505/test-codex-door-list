@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Restored local agent tooling is third-party code, not application source.
+    ".agents/**",
+    ".codex/**",
+    ".impeccable/**",
+    ".tmp/**",
   ]),
 ]);
 
