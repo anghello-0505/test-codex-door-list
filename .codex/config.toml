@@ -1,0 +1,5 @@
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+# Nombre de la variable de entorno que contiene el PAT.
+# NO pegues el token aquí: Codex lo lee de la variable en tiempo de ejecución.
+bearer_token_env_var = "GITHUB_PAT_TOKEN"

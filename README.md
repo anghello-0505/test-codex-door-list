@@ -1,4 +1,4 @@
-﻿# Doorlist
+# Doorlist
 
 La página principal muestra los eventos publicados y los cupos restantes de sus tipos de entrada. En `/organizador`, un usuario autenticado puede administrar sus eventos y tipos de entrada. La página pública `/eventos/[id]/registro` permite consultar un evento sin iniciar sesión; confirmar un boleto requiere una cuenta de comprador.
 
@@ -81,6 +81,8 @@ El enlace funciona como un secreto de acceso: cualquier persona que lo reciba po
 Consultar o escanear el QR no consume una entrada. La RPC `cambiar_estado_ticket(p_codigo, p_estado)` exige sesión y propiedad del evento: admite solo `used` o `revoked`, bloquea la entrada durante el cambio y rechaza un segundo uso o la reactivación de una entrada usada/revocada. Puede revocarse una entrada ya usada. No se añade una interfaz de escaneo en este cambio. La revocación no elimina el registro ni libera su cupo; eliminar el evento conserva el comportamiento previo y elimina también sus entradas.
 
 ## Comprobaciones
+
+La administración de personal de acceso vive en `/organizador/asistentes`. Consulta [identidad, seguridad, migración y pruebas del módulo](docs/staff-members.md) antes de desplegarlo. La migración local `20261110042901_staff_members.sql` necesita aplicación remota aprobada; no basta con compilar la aplicación. Las cuentas de personal permanecen bloqueadas durante esta primera etapa.
 
 ```bash
 npm run lint

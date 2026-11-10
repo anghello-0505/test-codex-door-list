@@ -97,7 +97,16 @@ export type ApiErrorCode =
   | "ticketUnavailable"
   | "deliveryNotConfigured"
   | "deliveryUnavailable"
-  | "registrationsUnavailable";
+  | "registrationsUnavailable"
+  | "staffAccessDenied"
+  | "staffUnavailable"
+  | "staffUsernameTaken"
+  | "staffConflict"
+  | "staffInvalidEvents"
+  | "staffNotConfigured"
+  | "staffCreationPending"
+  | "staffPasswordRejected"
+  | "staffPasswordUnconfirmed";
 export type ApiError = { error: ApiErrorCode };
 
 export type TicketEmailData = {
@@ -112,3 +121,23 @@ export type TicketEmailData = {
 
 
 export type RegistrationHistoryResponse = { publishedAt: string | null; estimated: boolean; days: { date: string; count: number }[] };
+
+// Staff are access-control personnel, never ticket holders or registrations.
+export type StaffMember = {
+  id: string;
+  name: string;
+  username: string;
+  isActive: boolean;
+  provisioningStatus: "pending" | "ready";
+  eventIds: string[];
+  createdAt: string;
+};
+export type StaffEventAssignment = { staffMemberId: string; eventId: string };
+export type StaffEvent = Pick<OrganizerEvent, "id" | "title" | "date" | "status">;
+export type CreateStaffMemberRequest = {
+  name: string; username: string; password: string; eventIds: string[]; idempotencyKey: string;
+};
+export type UpdateStaffMemberRequest = { name: string; username: string } | { isActive: boolean };
+export type StaffMembersResponse = { staffMembers: StaffMember[]; page: number; pageSize: number; total: number };
+export type StaffMemberResponse = { staffMember: StaffMember };
+export type StaffEventsResponse = { events: StaffEvent[] };
