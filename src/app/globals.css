@@ -1,0 +1,53 @@
+﻿@import "tailwindcss";
+
+:root {
+  --background: #171321;
+  --foreground: #f6f4fa;
+  --secondary: rgba(255, 255, 255, 0.70);
+  --accent: #bef264;
+  --surface: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.15);
+  --danger: #fda4af;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --font-sans: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+::selection { background: var(--accent); color: var(--background); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.event-art {
+  background: radial-gradient(ellipse at 50% 65%, #7850b5 0%, #40255f 40%, #251b35 75%);
+}
+
+.orbit {
+  position: absolute;
+  width: 85%;
+  height: 42%;
+  border: 1px solid #d5b7ff80;
+  border-radius: 50%;
+  transform: rotate(-35deg);
+}
+
+.orbit-two { width: 110%; height: 58%; }
+.orbit-three { width: 140%; height: 80%; }
+
+.orb {
+  width: 43%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #e5d4ff, #a677e7 35%, #59328d 65%, #291c42 90%);
+  box-shadow: 16px 24px 60px #140b2480, inset -10px -10px 25px #1d123b;
+}
