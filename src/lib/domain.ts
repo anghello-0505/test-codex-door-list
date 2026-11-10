@@ -41,7 +41,7 @@ export type TicketDelivery = {
 
 export type AvailableTicketType = TicketType & { available: number };
 export type AvailableEvent = Event & { isOpen: boolean; ticketTypes: AvailableTicketType[] };
-export type OrganizerEvent = Event & { status: EventStatus; capacity: number; ticketTypes: TicketType[] };
+export type OrganizerEvent = Event & { status: EventStatus; capacity: number; ticketTypes: TicketType[]; accessGraceMinutes?: number };
 export type OrganizerTicketType = TicketType & { registered: number; available: number; occupancyPercentage: number };
 export type AttendeeExportEntry = {
   id: string;
@@ -106,7 +106,8 @@ export type ApiErrorCode =
   | "staffNotConfigured"
   | "staffCreationPending"
   | "staffPasswordRejected"
-  | "staffPasswordUnconfirmed";
+  | "staffPasswordUnconfirmed"
+  | AccessErrorCode;
 export type ApiError = { error: ApiErrorCode };
 
 export type TicketEmailData = {
@@ -141,3 +142,21 @@ export type UpdateStaffMemberRequest = { name: string; username: string } | { is
 export type StaffMembersResponse = { staffMembers: StaffMember[]; page: number; pageSize: number; total: number };
 export type StaffMemberResponse = { staffMember: StaffMember };
 export type StaffEventsResponse = { events: StaffEvent[] };
+
+export type AccessErrorCode = "accessCredentialsInvalid" | "accessSessionExpired" | "accessRateLimited" |
+  "accessOperationConflict" | "accessCodeInvalid" | "accessTicketNotFound" | "accessTicketUsed" |
+  "accessTicketRevoked" | "accessEventUnavailable" | "accessOutsideWindow" | "accessUnavailable";
+export type AccessSession = { staffMemberId: string; organizerId: string; name: string; expiresAt: string; serverTime: string };
+export type AccessEvent = Pick<Event, "id" | "title" | "date" | "location"> & {
+  status: EventStatus; available: boolean; opensAt: string; closesAt: string;
+};
+export type AccessEventsResponse = { events: AccessEvent[]; serverTime: string };
+export type ValidateTicketRequest = { eventId: string; code: string; operationId: string; source: "camera" | "manual" };
+export type AccessResult = { operationId: string; result: "accepted"; holderName: string; ticketTypeName: string;
+  validatedAt: string; replayed: boolean };
+export type PendingValidation = { staffMemberId: string; eventId: string; operationId: string; fingerprint: string };
+export type ValidationHistoryEntry = { id: string; eventId: string; eventTitle: string | null; eventDeleted: boolean;
+  staffName: string; ticketReference: string | null; result: "accepted" | "rejected"; reason: string | null;
+  createdAt: string; source: "camera" | "manual" };
+export type ValidationHistoryResponse = { entries: ValidationHistoryEntry[]; nextCursor: string | null };
+export type ValidationHistoryEvent = { id: string; title: string; deleted: boolean };

@@ -2,17 +2,17 @@ import "server-only";
 import type { StaffMember } from "@/lib/domain";
 import { adminClient } from "@/lib/supabase/server";
 
-// This phase deliberately NEVER unbans staff, including active staff.
+// Provisioning remains blocked. Only the dedicated operational login may unban.
 export const staffBanDuration = "876000h";
 export const staffTechnicalEmail = (id: string) => `${id}@staff.invalid`;
 export const staffAuthConfigured = () => Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 type Identity = { id: string; email?: string; banned_until?: string; app_metadata: Record<string, unknown> };
 
-export function matchesStaffIdentity(user: Identity | null, memberId: string, organizerId: string) {
+export function matchesStaffIdentity(user: Identity | null, memberId: string, organizerId: string, requireBan = true) {
   return Boolean(user && user.id === memberId && user.email === staffTechnicalEmail(memberId) &&
     user.app_metadata.account_type === "access_staff" && user.app_metadata.staff_member_id === memberId &&
-    user.app_metadata.organizer_id === organizerId && Date.parse(user.banned_until ?? "") > Date.now());
+    user.app_metadata.organizer_id === organizerId && (!requireBan || Date.parse(user.banned_until ?? "") > Date.now()));
 }
 
 // Only these narrow operations can use the privileged Auth client. Callers must
@@ -43,11 +43,23 @@ export async function provisionStaffIdentity(member: StaffMember, organizerId: s
 export async function resetStaffIdentityPassword(memberId: string, organizerId: string, password: string) {
   const admin = adminClient().auth.admin;
   const existing = await admin.getUserById(memberId);
-  if (existing.error || !matchesStaffIdentity(existing.data.user, memberId, organizerId)) throw new Error("Staff identity unavailable");
+  if (existing.error || !matchesStaffIdentity(existing.data.user, memberId, organizerId, false)) throw new Error("Staff identity unavailable");
   const result = await admin.updateUserById(memberId, { password, ban_duration: staffBanDuration });
   if (result.error) {
     if (result.error.code === "weak_password" || result.error.code === "validation_failed") return "passwordRejected" as const;
     throw new Error("Staff password unconfirmed");
   }
   if (!matchesStaffIdentity(result.data.user, memberId, organizerId)) throw new Error("Staff password unconfirmed");
+}
+
+// Caller must first resolve an eligible member through resolve_staff_login.
+export async function enableStaffIdentity(memberId: string, organizerId: string) {
+  const admin = adminClient().auth.admin;
+  const existing = await admin.getUserById(memberId);
+  if (existing.error || !matchesStaffIdentity(existing.data.user, memberId, organizerId, false)) throw new Error("Staff identity unavailable");
+  if (Date.parse(existing.data.user!.banned_until ?? "") > Date.now()) {
+    const result = await admin.updateUserById(memberId, { ban_duration: "none" });
+    if (result.error || !matchesStaffIdentity(result.data.user, memberId, organizerId, false) ||
+        Date.parse(result.data.user?.banned_until ?? "") > Date.now()) throw new Error("Staff enable unconfirmed");
+  }
 }

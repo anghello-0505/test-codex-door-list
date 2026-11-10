@@ -16,7 +16,7 @@ function fixture(options = {}) {
       return { data: { user: null }, error: { status: options.lookupUnavailable ? 503 : 404 } };
     },
     async createUser(values) { calls.push({ method: "create", values }); return { data: { user: identity() }, error: options.createError ?? null }; },
-    async updateUserById(userId, values) { calls.push({ method: "update", id: userId, values }); return { data: { user: identity() }, error: options.updateError ?? null }; },
+    async updateUserById(userId, values) { calls.push({ method: "update", id: userId, values }); return { data: { user: values.ban_duration === "none" ? { ...identity(), banned_until: undefined } : identity() }, error: options.updateError ?? null }; },
   };
   return { calls, ...loadModule("src/lib/staff-auth.ts", { "server-only": {}, "@/lib/supabase/server": { adminClient: () => ({ auth: { admin } }) } }) };
 }
@@ -46,6 +46,20 @@ test("un fallo de búsqueda no se confunde con identidad inexistente", async () 
   const instance = fixture({ lookupUnavailable: true });
   await assert.rejects(instance.provisionStaffIdentity({ id }, owner, "password"));
   assert.ok(instance.calls.every((call) => call.method === "get"));
+});
+
+test("login habilita solo una identidad íntegra y el reset acepta identidades ya habilitadas", async () => {
+  const blocked = fixture({ existing: true });
+  await blocked.enableStaffIdentity(id, owner);
+  assert.deepEqual(blocked.calls[1].values, { ban_duration: "none" });
+  const enabled = fixture({ existing: true, user: { ...identity(), banned_until: undefined } });
+  await enabled.enableStaffIdentity(id, owner);
+  assert.deepEqual(enabled.calls.map((call) => call.method), ["get"]);
+  await enabled.resetStaffIdentityPassword(id, owner, "replacement-password");
+  assert.equal(enabled.calls.at(-1).values.ban_duration, "876000h");
+  const foreign = fixture({ existing: true, user: { ...identity(), app_metadata: {} } });
+  await assert.rejects(foreign.enableStaffIdentity(id, owner));
+  assert.ok(foreign.calls.every((call) => call.method === "get"));
 });
 
 test("restablecer verifica identidad destino y mantiene el bloqueo sin cambiar rol o correo", async () => {

@@ -101,6 +101,7 @@ export function mapOrganizerEvents(value: unknown): OrganizerEvent[] {
     location: text(event.lugar),
     status: eventStatus(event.estado),
     capacity: number(event.aforo_maximo),
+    accessGraceMinutes: typeof event.access_grace_minutes === "number" ? event.access_grace_minutes : 120,
     ticketTypes: records(event.tipos_entrada).map((ticketType) => ({
       id: text(ticketType.id),
       eventId: text(ticketType.evento_id),
@@ -121,8 +122,9 @@ export function mapOrganizerRegistrations(value: unknown, ticketTypes: TicketTyp
   }));
 }
 
-export function eventValuesToPersistence(value: { title: string; description: string; location: string; date: string; capacity: number }) {
-  return { titulo: value.title, descripcion: value.description, lugar: value.location, fecha: value.date, aforo_maximo: value.capacity };
+export function eventValuesToPersistence(value: { title: string; description: string; location: string; date: string; capacity: number; accessGraceMinutes?: number }) {
+  return { titulo: value.title, descripcion: value.description, lugar: value.location, fecha: value.date, aforo_maximo: value.capacity,
+    ...(value.accessGraceMinutes !== undefined ? { access_grace_minutes: value.accessGraceMinutes } : {}) };
 }
 
 export function eventStatusToPersistence(status: EventStatus) {

@@ -75,6 +75,7 @@ function OrganizerEventDetail({ params }: { params: Promise<{ id: string }> }) {
       {session && status === "missing" && <p role="alert" className="mt-8 rounded-2xl border border-white/15 p-6 text-white/70">El evento no existe o no tienes acceso a su panel.</p>}
       {session && status === "error" && <div role="alert" className="mt-8 rounded-2xl border border-red-400/40 bg-red-400/10 p-5 text-red-200"><p>No pudimos cargar los asistentes.</p><button type="button" className="mt-3 rounded-full border border-red-300/50 px-4 py-2 text-sm font-semibold hover:border-red-200" onClick={() => setRetry((value) => value + 1)}>Volver a intentar</button></div>}
       {session && status === "ready" && detail && <>
+        <Link className="mt-5 inline-flex min-h-11 items-center text-accent underline underline-offset-4" href={`/organizador/validaciones?eventId=${detail.event.id}`}>Ver historial de ingreso</Link>
         <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
           <div><h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">{detail.event.title}<span className="text-accent">.</span></h1><p className="mt-3 text-white/65"><time dateTime={detail.event.date}>{formatEventDate(detail.event.date)}</time> · {detail.event.location}</p></div>
         </div>

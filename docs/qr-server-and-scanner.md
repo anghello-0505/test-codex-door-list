@@ -1,11 +1,11 @@
 # QR: generación en servidor y lectura por cámara
 
-## Decisión pendiente de implementación
+## Implementación de lectura: etapa 2
 
 - **Generación:** conservar el paquete ya instalado `qrcode` y el helper `src/lib/ticket-qr.ts`.
-- **Lectura desde cámara:** incorporar `@zxing/browser` en un componente aislado con `"use client"` cuando se implemente el flujo de acceso.
+- **Lectura desde cámara:** `@zxing/browser` 0.2.1, instalado con autorización, en un componente aislado con `"use client"`. El flujo y las verificaciones están documentados en [Control de ingreso](access-control.md).
 
-No se debe instalar la dependencia del lector sin la aprobación requerida para nuevas dependencias.
+La instalación fue aprobada. Cualquier dependencia adicional sigue requiriendo autorización.
 
 ## Generación en servidor
 

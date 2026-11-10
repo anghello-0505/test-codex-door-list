@@ -9,7 +9,7 @@ import { provisionStaffIdentity, resetStaffIdentityPassword, staffAuthConfigured
 import { isUuid } from "@/lib/validation";
 
 type StaffAuth = { client: SupabaseClient; buyerId: string };
-class StaffError extends Error {
+export class StaffError extends Error {
   constructor(public errorCode: ApiErrorCode, public status: number) { super(errorCode); }
 }
 

@@ -5,7 +5,7 @@ import { mapOrganizerEvents } from "@/lib/persistence-mappers";
 // before exposing organizer data, even when the event is publicly readable.
 export async function findOrganizerEvent(client: SupabaseClient, eventId: string, userId: string) {
   const result = await client.from("events")
-    .select("id,titulo,descripcion,fecha,lugar,estado,aforo_maximo,tipos_entrada:ticket_types(id,evento_id,nombre,aforo_maximo)")
+    .select("id,titulo,descripcion,fecha,lugar,estado,aforo_maximo,access_grace_minutes,tipos_entrada:ticket_types(id,evento_id,nombre,aforo_maximo)")
     .eq("id", eventId).eq("propietario_id", userId).maybeSingle();
   if (result.error) throw new Error("Event query failed");
   if (!result.data) return null;
