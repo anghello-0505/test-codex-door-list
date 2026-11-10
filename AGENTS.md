@@ -61,4 +61,4 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Mantén las Skills completas y compartidas en `.codex/skills/door-list-ui/` y `.codex/skills/impeccable/`, incluidos sus agentes, referencias, scripts y ejecutables.
 - Las entradas de `.agents/skills/` sirven para el descubrimiento de Codex y remiten a los `SKILL.md` canónicos de `.codex/skills/`. Lee los canónicos y resuelve sus recursos desde esas carpetas; no mantengas copias independientes de sus instrucciones.
 - Incluye las Skills, sus entradas de descubrimiento y `.codex/hooks.json` en los commits y PR que las incorporen o cambien. No vuelvas a ignorar esas rutas completas ni las retires del índice de Git como archivos locales.
-- Conserva ignorados los demás estados y configuraciones locales de `.codex/` y `.agents/`; no agregues credenciales ni tokens a estos archivos.
+- Versiona `.codex/config.toml` como configuración compartida del proyecto, usando referencias a variables de entorno para credenciales. Conserva ignorados los demás estados y configuraciones locales de `.codex/` y `.agents/`; no agregues credenciales ni tokens a estos archivos.
