@@ -32,8 +32,13 @@ begin
     assert result->>'estado' = 'confirmado';
     if i > 1 then
       perform set_config('request.jwt.claim.sub', f.owner_id::text, true);
-      result := public.cambiar_estado_ticket(result#>>'{ticket,codigo}', case when i = 2 then 'used' else 'revoked' end);
-      assert result->>'estado' = 'actualizado';
+      if i = 2 then
+        -- Privileged fixture setup only; actual admission is covered by access_control.sql.
+        update public.tickets set estado='used' where codigo=result#>>'{ticket,codigo}';
+      else
+        result := public.cambiar_estado_ticket(result#>>'{ticket,codigo}', 'revoked');
+        assert result->>'estado' = 'actualizado';
+      end if;
       perform set_config('request.jwt.claim.sub', f.buyer_id::text, true);
     end if;
   end loop;

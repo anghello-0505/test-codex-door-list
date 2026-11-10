@@ -34,6 +34,7 @@ export default function AdminNavigation() {
         <Link href="/mis-boletos" className="text-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">Mis boletos</Link>
         <Link href="/organizador" className="text-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">Administrar eventos</Link>
         <Link href="/organizador/asistentes" className="text-accent hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent">Personal de acceso</Link>
+        <Link href="/organizador/validaciones" className="text-accent hover:text-accent">Historial de ingreso</Link>
       </nav>
       <details className="relative">
         <summary className="cursor-pointer list-none rounded-full border border-white/20 px-4 py-2 text-sm font-semibold hover:border-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">

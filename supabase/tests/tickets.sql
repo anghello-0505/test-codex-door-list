@@ -61,17 +61,19 @@ begin
   perform public.consultar_ticket(first_code);
   assert public.consultar_ticket(first_code)->>'estado' = 'valid', 'Viewing consumed the ticket';
   result := public.cambiar_estado_ticket(first_code, 'used');
-  assert result->>'estado' = 'no_autorizado', 'Buyer consumed ticket without organizer permission';
+  assert result->>'estado' = 'datos_invalidos', 'Legacy admission must be disabled';
   perform set_config('request.jwt.claim.sub', f.ajeno::text, true);
   result := public.cambiar_estado_ticket(first_code, 'revoked');
   assert result->>'estado' = 'no_autorizado';
 
   perform set_config('request.jwt.claim.sub', f.organizador::text, true);
   result := public.cambiar_estado_ticket(first_code, 'used');
-  assert result->>'estado' = 'actualizado';
+  assert result->>'estado' = 'datos_invalidos';
+  -- Trigger-only fixture. Operational admission is tested in access_control.sql.
+  update public.tickets set estado='used' where codigo=first_code;
   assert public.consultar_ticket(first_code)->>'estado' = 'used';
   result := public.cambiar_estado_ticket(first_code, 'used');
-  assert result->>'estado' = 'ya_usada', 'Ticket admitted twice';
+  assert result->>'estado' = 'datos_invalidos', 'Legacy admission accepted';
   result := public.cambiar_estado_ticket(first_code, 'valid');
   assert result->>'estado' = 'datos_invalidos';
   begin
@@ -82,7 +84,7 @@ begin
   result := public.cambiar_estado_ticket(first_code, 'revoked');
   assert result->>'estado' = 'actualizado';
   result := public.cambiar_estado_ticket(first_code, 'used');
-  assert result->>'estado' = 'ticket_revocado';
+  assert result->>'estado' = 'datos_invalidos';
   assert public.consultar_ticket(first_code)->>'estado' = 'revoked';
   begin
     update public.tickets set codigo = replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '') where codigo = first_code;
