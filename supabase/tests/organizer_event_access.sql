@@ -36,8 +36,9 @@ begin
         -- Privileged fixture setup only; actual admission is covered by access_control.sql.
         update public.tickets set estado='used' where codigo=result#>>'{ticket,codigo}';
       else
-        result := public.cambiar_estado_ticket(result#>>'{ticket,codigo}', 'revoked');
-        assert result->>'estado' = 'actualizado';
+        -- Privileged historical fixture; the reason/notification flow is tested
+        -- with real authorization in ticket_revocations.sql.
+        update public.tickets set estado='revoked' where codigo=result#>>'{ticket,codigo}';
       end if;
       perform set_config('request.jwt.claim.sub', f.buyer_id::text, true);
     end if;

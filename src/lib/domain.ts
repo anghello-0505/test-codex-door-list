@@ -29,6 +29,7 @@ export type Registration = {
   ticketTypeName: string;
   createdAt: string;
   ticket?: Ticket;
+  revocation?: { reason: string; emailStatus: TicketDeliveryStatus };
 };
 
 export type TicketDelivery = {
@@ -98,6 +99,9 @@ export type ApiErrorCode =
   | "deliveryNotConfigured"
   | "deliveryUnavailable"
   | "registrationsUnavailable"
+  | "ticketRevocationConflict"
+  | "ticketRevocationUnavailable"
+  | "ticketRevocationDenied"
   | "staffAccessDenied"
   | "staffUnavailable"
   | "staffUsernameTaken"

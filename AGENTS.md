@@ -58,6 +58,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Skills del proyecto
 
+- Los perfiles reutilizables están en `.codex/agents/`: `door_accessibility`, `ticket_email` y `end_to_end`. Consulta `docs/reusable-agents.md` para invocarlos y coordinar sus límites. Su existencia no implica autorización para delegar automáticamente ni para acceder a bases de datos, instalar dependencias o enviar correos.
+
 - Mantén las Skills completas y compartidas en `.codex/skills/door-list-ui/` y `.codex/skills/impeccable/`, incluidos sus agentes, referencias, scripts y ejecutables.
 - Las entradas de `.agents/skills/` sirven para el descubrimiento de Codex y remiten a los `SKILL.md` canónicos de `.codex/skills/`. Lee los canónicos y resuelve sus recursos desde esas carpetas; no mantengas copias independientes de sus instrucciones.
 - Incluye las Skills, sus entradas de descubrimiento y `.codex/hooks.json` en los commits y PR que las incorporen o cambien. No vuelvas a ignorar esas rutas completas ni las retires del índice de Git como archivos locales.

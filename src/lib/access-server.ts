@@ -6,6 +6,7 @@ import { readStaffBody, StaffError } from "@/lib/staff-members-server";
 import { errorResponse, jsonResponse } from "@/lib/api-response";
 import { validAccessLink } from "@/lib/access-control";
 import { isUuid } from "@/lib/validation";
+import { normalizeAccessEmail } from "@/lib/access-email";
 import { normalizeStaffUsername, validStaffUsername, validStaffPassword } from "@/lib/staff-member-validation";
 import type { ApiErrorCode, ValidationHistoryEntry } from "@/lib/domain";
 
@@ -72,6 +73,13 @@ export async function accessRoute(request: Request, link: string, action: string
     const client = publicClient(token);
     const identity = await client.auth.getUser(token);
     if (identity.error || !identity.data.user) return errorResponse("sessionRequired", 401);
+    if (action === "searchEmail") {
+      const input = await readStaffBody(request);
+      const email = normalizeAccessEmail(input.email);
+      if (Object.keys(input).some((key) => !["eventId", "email"].includes(key)) || !isUuid(input.eventId) || !email) return errorResponse("invalidData", 400);
+      const result = await client.rpc("staff_search_email", { p_link: link, p_event_id: input.eventId, p_email: email });
+      return result.error ? errorResponse("accessUnavailable", 503) : rpcResponse(result.data);
+    }
     let values: Record<string, unknown> = {};
     if (action === "validate") {
       const input = await readStaffBody(request);

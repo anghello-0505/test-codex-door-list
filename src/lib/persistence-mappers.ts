@@ -13,6 +13,7 @@ import type {
   TicketStatus,
   TicketType,
 } from "@/lib/domain";
+import { mapRevocationStatus } from "@/lib/ticket-revocation";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -113,13 +114,19 @@ export function mapOrganizerEvents(value: unknown): OrganizerEvent[] {
 
 export function mapOrganizerRegistrations(value: unknown, ticketTypes: TicketType[]): Registration[] {
   const names = new Map(ticketTypes.map((ticketType) => [ticketType.id, ticketType.name]));
-  return records(value).map((registration) => ({
-    id: text(registration.id),
-    holderName: text(registration.nombre_titular),
-    holderEmail: text(registration.correo_titular),
-    ticketTypeName: names.get(text(registration.tipo_entrada_id)) ?? "Tipo de entrada no disponible",
-    createdAt: text(registration.created_at),
-  }));
+  return records(value).map((registration) => {
+    const ticket = record(Array.isArray(registration.tickets) ? registration.tickets[0] : registration.tickets);
+    const revocation = record(Array.isArray(ticket.ticket_revocations) ? ticket.ticket_revocations[0] : ticket.ticket_revocations);
+    return {
+      id: text(registration.id),
+      holderName: text(registration.nombre_titular),
+      holderEmail: text(registration.correo_titular),
+      ticketTypeName: names.get(text(registration.tipo_entrada_id)) ?? "Tipo de entrada no disponible",
+      createdAt: text(registration.created_at),
+      ...(ticket.codigo && ["valid", "used", "revoked"].includes(text(ticket.estado)) ? { ticket: { code: text(ticket.codigo), status: ticketStatus(ticket.estado) } } : {}),
+      ...(revocation.reason ? { revocation: { reason: text(revocation.reason), emailStatus: mapRevocationStatus(revocation.delivery_status) } } : {}),
+    };
+  });
 }
 
 export function eventValuesToPersistence(value: { title: string; description: string; location: string; date: string; capacity: number; accessGraceMinutes?: number }) {

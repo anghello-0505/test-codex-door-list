@@ -31,7 +31,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
     const start = (page - 1) * pageSize;
     const [registrationResult, ...countResults] = await Promise.all([
       registrationsClient.from("registrations")
-        .select("id,nombre_titular,correo_titular,tipo_entrada_id,created_at", { count: "exact" })
+        .select("id,nombre_titular,correo_titular,tipo_entrada_id,created_at,tickets(codigo,estado,ticket_revocations(reason,delivery_status))", { count: "exact" })
         .eq("evento_id", id).order("created_at", { ascending: false }).order("id", { ascending: false })
         .range(start, start + pageSize - 1),
       ...event.ticketTypes.map((ticketType) => registrationsClient.from("registrations")

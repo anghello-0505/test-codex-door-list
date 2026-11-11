@@ -128,7 +128,8 @@ begin
   assert not exists(select 1 from public.staff_event_assignments);
   assert not exists(select 1 from public.events);
   assert public.confirmar_registro(f.event_id, gen_random_uuid(), 'Holder', 'holder@example.test', gen_random_uuid())->>'estado' = 'sesion_requerida';
-  assert public.cambiar_estado_ticket(repeat('a',64), 'used')->>'estado' = 'sesion_requerida';
+  assert not has_function_privilege('authenticated','public.cambiar_estado_ticket(text,text)','execute');
+  assert public.revoke_ticket_with_reason(f.event_id,gen_random_uuid(),'Denied')->>'error'='session_required';
   perform pg_temp.staff_expect_error('select public.mis_boletos()', '42501');
   perform pg_temp.staff_expect_error(format('select public.reserve_staff_member(%L,%L,%L::uuid[],%L::uuid)', 'Nested staff', 'nested', '{}', gen_random_uuid()), '42501');
   perform pg_temp.staff_expect_error(format('insert into public.events(propietario_id,titulo,descripcion,fecha,lugar,aforo_maximo) values (%L,%L,%L,now(),%L,10)',f.member_id,'Denied','','Test'), '42501');
