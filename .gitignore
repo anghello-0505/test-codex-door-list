@@ -51,6 +51,11 @@ supabase/.temp/
 !/.codex/config.toml
 !/.codex/skills/
 !/.codex/hooks.json
+!/.codex/agents/
+/.codex/agents/*
+!/.codex/agents/door_accessibility.toml
+!/.codex/agents/ticket_email.toml
+!/.codex/agents/end_to_end.toml
 /.codex/skills/*
 !/.codex/skills/door-list-ui/
 !/.codex/skills/door-list-ui/**
