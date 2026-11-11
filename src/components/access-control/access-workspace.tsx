@@ -5,7 +5,9 @@ import { accessClient } from "@/lib/supabase/access-client";
 import { accessField as field, accessPrimary as primary, accessSecondary as secondary, accessMessage, codeFingerprint, fetchAccess } from "@/lib/access-control";
 import { formatEventDate } from "@/lib/date";
 import type { AccessSession, AccessEvent, AccessEventsResponse, AccessResult, PendingValidation } from "@/lib/domain";
+import type { AccessEmailSearchResponse } from "@/lib/access-email";
 import CameraScanner from "./camera-scanner";
+import EmailSearch from "./email-search";
 import Link from "next/link";
 
 class AccessFailure extends Error {
@@ -223,6 +225,19 @@ export default function AccessWorkspace({ link }: { link: string }) {
   }
   const selected = events.find((event) => event.id === eventId);
   const canValidate = Boolean(selected?.available && eventsState === "ready");
+  async function searchEmail(email: string): Promise<AccessEmailSearchResponse> {
+    if (!eventId || !sessionRef.current || locked.current || pendingRef.current) throw new Error("Termina la operación pendiente antes de buscar.");
+    const epoch = authEpoch.current;
+    locked.current = true; setBusy(true); setScanning(false); setResult(null); setRejected(""); setError("");
+    try {
+      const response = await request("asistentes", "POST", { eventId, email });
+      if (!mounted.current || authEpoch.current !== epoch) throw new Error("La sesión cambió. Busca nuevamente.");
+      return response.data as AccessEmailSearchResponse;
+    } catch (failure) {
+      if (authEpoch.current === epoch && failure instanceof AccessFailure && [401, 403].includes(failure.status)) await clearSession(failure.message);
+      throw failure;
+    } finally { locked.current = false; if (mounted.current) setBusy(false); }
+  }
   if (checking) return <p role="status">Comprobando sesión…</p>;
   if (!session) return <>
     <Link href="/" className="text-xl font-extrabold">doorlist<span className="text-accent">.</span></Link>
@@ -256,6 +271,7 @@ export default function AccessWorkspace({ link }: { link: string }) {
       {!scanning && <button className={`${primary} w-full`} disabled={busy || !canValidate} onClick={() => { setResult(null); setRejected(""); setError(""); setCameraError(""); setScanning(true); }}>{result || rejected ? "Escanear siguiente" : pending ? "Leer la misma entrada" : "Activar cámara"}</button>}
       {scanning && <button className={secondary} onClick={() => setScanning(false)}>Detener cámara</button>}
       <form className="border-t border-white/15 pt-5" onSubmit={(event) => { event.preventDefault(); void validate(code, "manual"); }}><label className="block font-semibold">Código de la entrada<input className={field} value={code} onChange={(event) => setCode(event.target.value)} autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={1024} required disabled={busy || !canValidate} /></label><p className="mt-2 text-sm text-white/70">Copia los 64 caracteres que aparecen en el boleto.</p><button className={`${secondary} mt-4 w-full`} disabled={busy || !canValidate || !code.trim()}>Validar código</button></form>
+      <EmailSearch key={`${session.staffMemberId}:${eventId}:${canValidate}`} disabled={busy || !canValidate || !!pending} onSearch={searchEmail} onValidate={(value) => void validate(value, "manual")} />
     </section>}
   </>;
 }

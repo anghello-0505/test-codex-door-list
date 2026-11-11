@@ -100,6 +100,44 @@ test("cuerpo JSON mal formado usa 400 y no llega al validador", async () => {
   const response = await f.accessRoute(new Request("https://doorlist.test/api", { method: "POST", headers: { Authorization: "Bearer token", "Content-Type": "application/json" }, body: "{" }), link, "validate");
   assert.equal(response.status, 400); assert.ok(!f.calls.some((call) => call.name));
 });
+
+test("búsqueda email normaliza el titular y conserva evento/link autenticados", async () => {
+  const data = { tickets: [{ ticketId: operationId, holderName: "Titular", ticketTypeName: "General", status: "valid", code: "c".repeat(64) }], truncated: false };
+  const f = fixture({ rpcData: data });
+  const response = await f.accessRoute(request({ eventId, email: " TITULAR@Example.COM " }), link, "searchEmail");
+  assert.equal(response.status, 200); assert.deepEqual(await response.json(), data);
+  assert.deepEqual(f.calls.find((call) => call.name), { name: "staff_search_email", values: { p_link: link, p_event_id: eventId, p_email: "titular@example.com" } });
+});
+
+test("búsqueda no permite enumeración parcial, eventos inválidos ni identidad del cliente", async () => {
+  for (const body of [{ eventId, email: "titular" }, { eventId, email: "%@%" }, { eventId, email: "a".repeat(250) + "@example.com" }, { eventId: "otro", email: "a@example.com" }, { eventId, email: "a@example.com", organizerId: owner }]) {
+    const f = fixture();
+    assert.equal((await f.accessRoute(request(body), link, "searchEmail")).status, 400);
+    assert.ok(!f.calls.some((call) => call.name));
+  }
+});
+
+test("búsqueda requiere sesión y origen propios; no usa cliente administrador", async () => {
+  for (const [req, options, expected] of [[request({ eventId, email: "a@example.com" }, false), {}, 401], [request({ eventId, email: "a@example.com" }), { unauthenticated: true }, 401], [request({ eventId, email: "a@example.com" }, true, "https://foreign.test"), {}, 403]]) {
+    const f = fixture(options);
+    assert.equal((await f.accessRoute(req, link, "searchEmail")).status, expected);
+    assert.ok(!f.calls.some((call) => call.name || call === "resolveLogin"));
+  }
+});
+
+test("búsqueda distingue vacío, permisos retirados, límite y fallo técnico sin filtrar proveedor", async () => {
+  for (const [options, status, body] of [
+    [{ rpcData: { tickets: [], truncated: false } }, 200, { tickets: [], truncated: false }],
+    [{ rpcData: { error: "eventUnavailable", status: 404 } }, 404, { error: "eventUnavailable" }],
+    [{ rpcData: { error: "accessSessionExpired", status: 401 } }, 401, { error: "accessSessionExpired" }],
+    [{ rpcData: { error: "accessRateLimited", status: 429 } }, 429, { error: "accessRateLimited" }],
+    [{ databaseError: true }, 503, { error: "accessUnavailable" }],
+  ]) {
+    const f = fixture(options); const response = await f.accessRoute(request({ eventId, email: "a@example.com" }), link, "searchEmail");
+    assert.equal(response.status, status); assert.deepEqual(await response.json(), body);
+    assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+  }
+});
 test("rangos de configuración respetan 0–12 horas y pasos de media hora", () => {
   const { validAccessGrace, validAccessLink } = loadModule("src/lib/access-control.ts");
   for (const value of [0, 30, 120, 720]) assert.equal(validAccessGrace(value), true);
